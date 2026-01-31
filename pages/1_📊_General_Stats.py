@@ -33,7 +33,7 @@ st.subheader("🏆 Overall Team Standings")
 st.caption("Top teams by total points accumulated across all games.")
 
 limit = st.slider("Number of teams to show", 5, 100, 20)
-display_df = top_teams_df.head(limit).copy()
+display_df = top_teams_df.head(limit).copy().reset_index(drop=True)
 # Clean up dataframe for display
 if 'id' in display_df.columns:
     display_df = display_df.drop(columns=['id'])
