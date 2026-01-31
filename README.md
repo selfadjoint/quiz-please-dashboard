@@ -1,6 +1,6 @@
 # Quiz Please Statistics Dashboard 📊
 
-A Streamlit-based analytics dashboard for tracking Quiz Please game statistics, team performance, and head-to-head comparisons.
+A Streamlit-based analytics dashboard for tracking Quiz Please Yerevan game statistics, team performance, and head-to-head comparisons.
 
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat&logo=python&logoColor=white)
@@ -92,6 +92,49 @@ quiz-please-dashboard/
 - **Visualizations**: Plotly
 - **Data Processing**: Pandas
 - **Database**: PostgreSQL via SQLAlchemy
+
+## Data Source
+
+Game data is scraped from [Quiz Please Yerevan](https://yerevan.quizplease.ru/schedule-past) using a separate data collection project:
+
+📦 **Data Collector**: [quiz-please-game-stats-collector](https://github.com/selfadjoint/quiz-please-game-stats-collector)
+
+## Data Model
+
+The PostgreSQL database uses the following schema (`quizplease` schema):
+
+```
+┌──────────────────────┐       ┌──────────────────────────────┐
+│        teams         │       │            games             │
+├──────────────────────┤       ├──────────────────────────────┤
+│ id (PK)              │       │ id (PK)                      │
+│ name                 │       │ game_date                    │
+└──────────────────────┘       │ game_name                    │
+           │                   │ game_number                  │
+           │                   │ category                     │
+           │                   └──────────────────────────────┘
+           │                              │
+           ▼                              ▼
+┌─────────────────────────────────────────────────┐
+│          team_game_participations               │
+├─────────────────────────────────────────────────┤
+│ id (PK)                                         │
+│ team_id (FK → teams)                            │
+│ game_id (FK → games)                            │
+│ rank                                            │
+│ total_score                                     │
+└─────────────────────────────────────────────────┘
+                       │
+                       ▼
+         ┌─────────────────────────┐
+         │      round_scores       │
+         ├─────────────────────────┤
+         │ id (PK)                 │
+         │ participation_id (FK)  │
+         │ round_name              │
+         │ score                   │
+         └─────────────────────────┘
+```
 
 ## License
 
