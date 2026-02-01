@@ -13,16 +13,24 @@ st.title("📊 General Statistics")
 filters = render_sidebar_filters()
 
 # --- Overview Metrics ---
+# We need game count to calculate average teams per game
+from src.db import get_games_list
+games_df = get_games_list(game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
+num_games = len(games_df)
+
 top_teams_df = get_overall_top_teams(limit=None, game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues']) # Get all for calculations
 
-if not top_teams_df.empty:
+if not top_teams_df.empty and num_games > 0:
+    total_participations = top_teams_df['games_played'].sum()
+    avg_teams_per_game = total_participations / num_games
+    
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Total Participated Teams", len(top_teams_df))
+        st.metric("Avg Teams / Game", round(float(avg_teams_per_game), 1))
     with col2:
-        st.metric("Avg Points per Game", round(top_teams_df['avg_points'].mean(), 1))
+        st.metric("Total Games", num_games)
     with col3:
-        pass
+        st.metric("Avg Points / Game", round(top_teams_df['avg_points'].mean(), 1))
 else:
     st.warning("No data available.")
 
