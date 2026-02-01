@@ -31,7 +31,7 @@ def render_sidebar_filters():
     st.sidebar.markdown("---")
     st.sidebar.subheader("🎯 Filters")
     
-    available_games, available_categories = get_filter_options()
+    available_games, available_categories, available_venues = get_filter_options()
     
     selected_games = st.sidebar.multiselect(
         "Game Name",
@@ -44,8 +44,15 @@ def render_sidebar_filters():
         options=available_categories,
         default=[]
     )
+
+    selected_venues = st.sidebar.multiselect(
+        "Venue",
+        options=available_venues,
+        default=[]
+    )
     
     return {
         "game_names": selected_games,
-        "categories": selected_categories
+        "categories": selected_categories,
+        "venues": selected_venues
     }

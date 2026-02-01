@@ -9,9 +9,12 @@ A Streamlit-based analytics dashboard for tracking Quiz Please Yerevan game stat
 ## Features
 
 ### 🏠 Main Page
-- Quick overview statistics (Total Teams, Total Games, Latest Game)
+- Quick overview statistics (Avg Teams/Game, Total Games, Latest Game)
 - Game selector with detailed leaderboard
 - Winner highlights with podium-style coloring
+
+### Sidebar Filters
+- Filter results by **Game Name**, **Category**, and **Venue** across all pages.
 
 ### 📊 General Statistics
 - Overall Team Standings table with rankings
@@ -112,6 +115,7 @@ The PostgreSQL database uses the following schema (`quizplease` schema):
 └──────────────────────┘       │ game_name                    │
            │                   │ game_number                  │
            │                   │ category                     │
+           │                   │ venue                        │
            │                   └──────────────────────────────┘
            │                              │
            ▼                              ▼

@@ -42,18 +42,20 @@ def get_all_teams():
 @st.cache_data(ttl=3600)
 def get_filter_options():
     """
-    Returns distinct game names and categories for filtering.
+    Returns distinct game names, categories, and venues for filtering.
     """
     query_games = "SELECT DISTINCT game_name FROM quizplease.games ORDER BY game_name;"
     query_categories = "SELECT DISTINCT category FROM quizplease.games ORDER BY category;"
+    query_venues = "SELECT DISTINCT venue FROM quizplease.games ORDER BY venue;"
     
     games = run_query(query_games)['game_name'].tolist()
     categories = run_query(query_categories)['category'].tolist()
+    venues = run_query(query_venues)['venue'].tolist()
     
-    return games, categories
+    return games, categories, venues
 
 @st.cache_data(ttl=3600)
-def get_games_list(game_names=None, categories=None):
+def get_games_list(game_names=None, categories=None, venues=None):
     filters = []
     params = {}
     
@@ -63,11 +65,14 @@ def get_games_list(game_names=None, categories=None):
     if categories:
         filters.append("category IN :categories")
         params["categories"] = tuple(categories)
+    if venues:
+        filters.append("venue IN :venues")
+        params["venues"] = tuple(venues)
         
     where_clause = "WHERE " + " AND ".join(filters) if filters else ""
     
     query = f"""
-        SELECT id, game_date, game_name, game_number, category 
+        SELECT id, game_date, game_name, game_number, category, venue 
         FROM quizplease.games 
         {where_clause}
         ORDER BY game_date DESC;
@@ -76,7 +81,7 @@ def get_games_list(game_names=None, categories=None):
 
 
 @st.cache_data(ttl=3600)
-def get_overall_top_teams(limit=None, game_names=None, categories=None):
+def get_overall_top_teams(limit=None, game_names=None, categories=None, venues=None):
     """
     Returns top teams based on total points, optionally filtered.
     """
@@ -89,6 +94,9 @@ def get_overall_top_teams(limit=None, game_names=None, categories=None):
     if categories:
         filters.append("g.category IN :categories")
         params["categories"] = tuple(categories)
+    if venues:
+        filters.append("g.venue IN :venues")
+        params["venues"] = tuple(venues)
         
     where_clause = "WHERE " + " AND ".join(filters) if filters else ""
     
@@ -119,7 +127,7 @@ def get_overall_top_teams(limit=None, game_names=None, categories=None):
 
 
 @st.cache_data(ttl=3600)
-def get_top_n_finishes(top_n=3, game_names=None, categories=None):
+def get_top_n_finishes(top_n=3, game_names=None, categories=None, venues=None):
     """
     Returns how many times each team finished in the top N ranks.
     """
@@ -132,6 +140,9 @@ def get_top_n_finishes(top_n=3, game_names=None, categories=None):
     if categories:
         filters.append("g.category IN :categories")
         params["categories"] = tuple(categories)
+    if venues:
+        filters.append("g.venue IN :venues")
+        params["venues"] = tuple(venues)
         
     where_clause = "WHERE " + " AND ".join(filters)
     
@@ -150,7 +161,7 @@ def get_top_n_finishes(top_n=3, game_names=None, categories=None):
 
 
 @st.cache_data(ttl=3600)
-def get_avg_round_scores_by_team(game_names=None, categories=None):
+def get_avg_round_scores_by_team(game_names=None, categories=None, venues=None):
     """
     Returns average score per round_name for each team.
     """
@@ -163,9 +174,12 @@ def get_avg_round_scores_by_team(game_names=None, categories=None):
     if categories:
         filters.append("g.category IN :categories")
         params["categories"] = tuple(categories)
+    if venues:
+        filters.append("g.venue IN :venues")
+        params["venues"] = tuple(venues)
         
     where_clause = "WHERE " + " AND ".join(filters) if filters else ""
-
+    
     query = f"""
         SELECT 
             t.name,
@@ -182,7 +196,7 @@ def get_avg_round_scores_by_team(game_names=None, categories=None):
 
 
 @st.cache_data(ttl=3600)
-def get_team_game_history(team_id, game_names=None, categories=None):
+def get_team_game_history(team_id, game_names=None, categories=None, venues=None):
     """
     Returns game history for a specific team.
     """
@@ -195,16 +209,20 @@ def get_team_game_history(team_id, game_names=None, categories=None):
     if categories:
         filters.append("g.category IN :categories")
         params["categories"] = tuple(categories)
+    if venues:
+        filters.append("g.venue IN :venues")
+        params["venues"] = tuple(venues)
         
     where_clause = "WHERE " + " AND ".join(filters)
-
+    
     query = f"""
         SELECT 
             g.id as game_id,
             g.game_date,
             g.game_name,
             tgp.rank,
-            tgp.total_score
+            tgp.total_score,
+            g.venue
         FROM quizplease.team_game_participations tgp
         JOIN quizplease.games g ON tgp.game_id = g.id
         {where_clause}

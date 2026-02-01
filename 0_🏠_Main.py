@@ -55,7 +55,7 @@ if engine:
     
     # --- Filter: Select Game ---
     # Apply filters to the game list
-    games_df = get_games_list(game_names=filters['game_names'], categories=filters['categories'])
+    games_df = get_games_list(game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
 
     if not games_df.empty:
         # Create a readable label for the dropdown

@@ -13,7 +13,7 @@ st.title("📊 General Statistics")
 filters = render_sidebar_filters()
 
 # --- Overview Metrics ---
-top_teams_df = get_overall_top_teams(limit=None, game_names=filters['game_names'], categories=filters['categories']) # Get all for calculations
+top_teams_df = get_overall_top_teams(limit=None, game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues']) # Get all for calculations
 
 if not top_teams_df.empty:
     col1, col2, col3 = st.columns(3)
@@ -64,7 +64,7 @@ col_tree_1, col_tree_2 = st.columns([1, 3])
 with col_tree_1:
     top_n_filter = st.selectbox("Select Top N Rank", [1, 3, 5, 10], index=1)
 
-finishes_df = get_top_n_finishes(top_n=top_n_filter, game_names=filters['game_names'], categories=filters['categories'])
+finishes_df = get_top_n_finishes(top_n=top_n_filter, game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
 
 if not finishes_df.empty:
     fig_tree = px.treemap(
@@ -90,7 +90,7 @@ st.subheader("🎯 Average Performance by Round")
 st.caption("How teams perform on average in specific rounds.")
 
 # Fetch data and filter for top teams to keep chart readable
-avg_scores_df = get_avg_round_scores_by_team(game_names=filters['game_names'], categories=filters['categories'])
+avg_scores_df = get_avg_round_scores_by_team(game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
 
 if not avg_scores_df.empty:
     # Filter for teams in our top_teams_df list (top limit by default) to reduce noise

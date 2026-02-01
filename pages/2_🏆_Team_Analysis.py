@@ -32,7 +32,7 @@ selected_team_id = int(teams_df[teams_df['name'] == selected_team_name]['id'].il
 
 # --- Section 1: Dynamics of Game Points ---
 st.subheader("📈 Performance Dynamics")
-dynamics_df = get_team_game_history(selected_team_id, game_names=filters['game_names'], categories=filters['categories'])
+dynamics_df = get_team_game_history(selected_team_id, game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
 
 
 if not dynamics_df.empty:
@@ -208,7 +208,7 @@ if not dynamics_df.empty:
         compare_team_id = int(teams_df[teams_df['name'] == compare_team_name]['id'].iloc[0])
         
         # Get comparison team's game history
-        compare_dynamics_df = get_team_game_history(compare_team_id, game_names=filters['game_names'], categories=filters['categories'])
+        compare_dynamics_df = get_team_game_history(compare_team_id, game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
         
         if not compare_dynamics_df.empty:
             # Calculate metrics for both teams
