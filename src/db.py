@@ -34,10 +34,56 @@ def run_query(query, params=None):
 
 # Data Fetching Functions
 
-@st.cache_data(ttl=3600) # Cache for 1 hour
+@st.cache_data(ttl=3600)
 def get_all_teams():
     query = "SELECT id, name FROM quizplease.teams ORDER BY name;"
     return run_query(query)
+
+@st.cache_data(ttl=3600)
+def get_summary_stats(game_names=None, categories=None, venues=None):
+    """
+    Returns high-level statistics: total games, average teams per game, and latest game date.
+    """
+    filters = []
+    params = {}
+    
+    if game_names:
+        filters.append("game_name IN :game_names")
+        params["game_names"] = tuple(game_names)
+    if categories:
+        filters.append("category IN :categories")
+        params["categories"] = tuple(categories)
+    if venues:
+        filters.append("venue IN :venues")
+        params["venues"] = tuple(venues)
+        
+    where_clause = "WHERE " + " AND ".join(filters) if filters else ""
+    
+    query = f"""
+        WITH filtered_games AS (
+            SELECT id, game_date 
+            FROM quizplease.games 
+            {where_clause}
+        ),
+        game_counts AS (
+            SELECT game_id, COUNT(*) as team_count
+            FROM quizplease.team_game_participations
+            WHERE game_id IN (SELECT id FROM filtered_games)
+            GROUP BY game_id
+        )
+        SELECT 
+            (SELECT COUNT(*) FROM filtered_games) as total_games,
+            (SELECT AVG(team_count) FROM game_counts) as avg_teams,
+            (SELECT MAX(game_date) FROM filtered_games) as latest_game;
+    """
+    res = run_query(query, params=params)
+    if not res.empty:
+        return {
+            "total_games": int(res.iloc[0]['total_games']),
+            "avg_teams": float(res.iloc[0]['avg_teams']) if res.iloc[0]['avg_teams'] is not None else 0,
+            "latest_game": res.iloc[0]['latest_game']
+        }
+    return {"total_games": 0, "avg_teams": 0, "latest_game": None}
 
 @st.cache_data(ttl=3600)
 def get_filter_options():

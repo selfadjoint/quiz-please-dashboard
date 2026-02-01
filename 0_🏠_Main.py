@@ -1,6 +1,6 @@
 import streamlit as st
 from src.utils import set_page_config, inject_custom_css, render_sidebar_filters
-from src.db import get_connection, run_query, get_games_list, get_full_game_results
+from src.db import get_connection, run_query, get_games_list, get_full_game_results, get_summary_stats
 import pandas as pd
 
 
@@ -24,31 +24,24 @@ engine = get_connection()
 if engine:
     st.success("Database connected successfully!", icon="✅")
     
-    # Quick Stats
-    # Note: Quick stats might ignore filters or not. User didn't specify. 
-    # Usually "Total Teams" is global. "Latest Game" is global. 
-    # Let's keep them global for now as they are "Overall Stats".
+    # Quick Stats (Filtered)
+    summary = get_summary_stats(
+        game_names=filters['game_names'], 
+        categories=filters['categories'], 
+        venues=filters['venues']
+    )
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        avg_teams_query = """
-            SELECT AVG(team_count) as avg_teams 
-            FROM (
-                SELECT COUNT(*) as team_count 
-                FROM quizplease.team_game_participations 
-                GROUP BY game_id
-            ) as counts
-        """
-        avg_teams = run_query(avg_teams_query).iloc[0]['avg_teams']
-        st.metric("Avg Teams / Game", round(float(avg_teams), 1))
+        st.metric("Avg Teams / Game", round(summary['avg_teams'], 1))
         
     with col2:
-        game_count = run_query("SELECT COUNT(*) as count FROM quizplease.games").iloc[0]['count']
-        st.metric("Total Games", game_count)
+        st.metric("Total Games", summary['total_games'])
         
     with col3:
-        latest_game = run_query("SELECT MAX(game_date) as max_date FROM quizplease.games").iloc[0]['max_date']
-        st.metric("Latest Game", str(latest_game))
+        latest = summary['latest_game']
+        st.metric("Latest Game", str(latest) if latest else "N/A")
 
     st.markdown("---")
     st.markdown("---")

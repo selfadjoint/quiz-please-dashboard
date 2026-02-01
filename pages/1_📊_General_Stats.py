@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from src.db import get_overall_top_teams, get_top_n_finishes, get_avg_round_scores_by_team
+from src.db import get_overall_top_teams, get_top_n_finishes, get_avg_round_scores_by_team, get_summary_stats
 from src.utils import render_sidebar_filters, set_page_config
 
 set_page_config(page_title="General Stats", page_icon="assets/logo.svg")
@@ -13,22 +13,20 @@ st.title("📊 General Statistics")
 filters = render_sidebar_filters()
 
 # --- Overview Metrics ---
-# We need game count to calculate average teams per game
-from src.db import get_games_list
-games_df = get_games_list(game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues'])
-num_games = len(games_df)
+summary = get_summary_stats(
+    game_names=filters['game_names'], 
+    categories=filters['categories'], 
+    venues=filters['venues']
+)
 
 top_teams_df = get_overall_top_teams(limit=None, game_names=filters['game_names'], categories=filters['categories'], venues=filters['venues']) # Get all for calculations
 
-if not top_teams_df.empty and num_games > 0:
-    total_participations = top_teams_df['games_played'].sum()
-    avg_teams_per_game = total_participations / num_games
-    
+if not top_teams_df.empty and summary['total_games'] > 0:
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Avg Teams / Game", round(float(avg_teams_per_game), 1))
+        st.metric("Avg Teams / Game", round(summary['avg_teams'], 1))
     with col2:
-        st.metric("Total Games", num_games)
+        st.metric("Total Games", summary['total_games'])
     with col3:
         st.metric("Avg Points / Game", round(top_teams_df['avg_points'].mean(), 1))
 else:
