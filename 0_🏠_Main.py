@@ -31,8 +31,16 @@ if engine:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        team_count = run_query("SELECT COUNT(*) as count FROM quizplease.teams").iloc[0]['count']
-        st.metric("Total Teams", team_count)
+        avg_teams_query = """
+            SELECT AVG(team_count) as avg_teams 
+            FROM (
+                SELECT COUNT(*) as team_count 
+                FROM quizplease.team_game_participations 
+                GROUP BY game_id
+            ) as counts
+        """
+        avg_teams = run_query(avg_teams_query).iloc[0]['avg_teams']
+        st.metric("Avg Teams / Game", round(float(avg_teams), 1))
         
     with col2:
         game_count = run_query("SELECT COUNT(*) as count FROM quizplease.games").iloc[0]['count']
