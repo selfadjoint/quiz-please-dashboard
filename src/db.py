@@ -44,7 +44,7 @@ def get_summary_stats(game_names=None, categories=None, venues=None):
     """
     Returns high-level statistics: total games, average teams per game, and latest game date.
     """
-    filters = []
+    filters = ["game_date <= CURRENT_DATE"]
     params = {}
     
     if game_names:
@@ -90,9 +90,9 @@ def get_filter_options():
     """
     Returns distinct game names, categories, and venues for filtering.
     """
-    query_games = "SELECT DISTINCT game_name FROM quizplease.games ORDER BY game_name;"
-    query_categories = "SELECT DISTINCT category FROM quizplease.games ORDER BY category;"
-    query_venues = "SELECT DISTINCT venue FROM quizplease.games ORDER BY venue;"
+    query_games = "SELECT DISTINCT game_name FROM quizplease.games WHERE game_date <= CURRENT_DATE ORDER BY game_name;"
+    query_categories = "SELECT DISTINCT category FROM quizplease.games WHERE game_date <= CURRENT_DATE ORDER BY category;"
+    query_venues = "SELECT DISTINCT venue FROM quizplease.games WHERE game_date <= CURRENT_DATE ORDER BY venue;"
     
     games = run_query(query_games)['game_name'].tolist()
     categories = run_query(query_categories)['category'].tolist()
@@ -102,7 +102,7 @@ def get_filter_options():
 
 @st.cache_data(ttl=3600)
 def get_games_list(game_names=None, categories=None, venues=None):
-    filters = []
+    filters = ["game_date <= CURRENT_DATE"]
     params = {}
     
     if game_names:
