@@ -10,8 +10,9 @@ def get_connection():
     """
     try:
         db_config = st.secrets["connections"]["postgresql"]
-        # SQLAlchemy connection string: postgresql://user:password@host:port/database
-        connection_str = f"postgresql://{db_config['username']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
+        # SQLAlchemy connection string: postgresql+psycopg2://user:password@host:port/database
+        # Driver explicit: SQLAlchemy 2.1+ defaults bare postgresql:// to psycopg3.
+        connection_str = f"postgresql+psycopg2://{db_config['username']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
         engine = create_engine(connection_str)
         return engine
     except Exception as e:
